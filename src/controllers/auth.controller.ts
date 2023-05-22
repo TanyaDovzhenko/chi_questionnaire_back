@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { userService } from '../services/user.service.js';
-import { hashService } from '../services/hash.service.js';
-import { jwtService } from '../services/jwt.service.js';
+import { hash } from '../utils/hash.js';
+import { generateTokens } from '../utils/jwt.js';
 
 
 class AuthController {
@@ -11,12 +11,11 @@ class AuthController {
         const user = await userService.getUserByLogin(login);
         if (!user) return res.json({ error: "User doesn't exist" }).status(404);
 
-        const comparePassword = hashService.hash(password);
-        if (comparePassword !== user.password) {
+        if (hash(password) !== user.password) {
             return res.json({ error: 'Incorrect password' }).status(401);
         }
 
-        const tokens = jwtService.generateTokens({ id: user._id.toString(), login });
+        const tokens = generateTokens({ id: user._id.toString(), login });
         return res.json({ ...tokens });
     }
 }
